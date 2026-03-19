@@ -1,4 +1,4 @@
-# RainDrop 🌧️
+# RainDrop 
 
 A modern, responsive weather application with AI-powered assistant, built with React and TypeScript.
 
@@ -9,7 +9,7 @@ A modern, responsive weather application with AI-powered assistant, built with R
 ![n8n](https://img.shields.io/badge/n8n-AI_Backend-EA4B71?logo=n8n&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## 📸 Screenshots
+##  Screenshots
 
 ### Application Interface
 ![RainDrop Frontend](docs/images/front.png)
@@ -17,7 +17,7 @@ A modern, responsive weather application with AI-powered assistant, built with R
 ### n8n AI Workflow
 ![n8n Architecture](docs/images/n8n.png)
 
-## ✨ Features
+##  Features
 
 ### Weather Data
 - **Real-time weather** — Current conditions with temperature, humidity, wind, and more
@@ -45,7 +45,7 @@ A modern, responsive weather application with AI-powered assistant, built with R
 - **Responsive design** — Optimized for desktop and mobile
 - **Persistent preferences** — Saves your location and settings
 
-## 🏗️ Architecture
+##  Architecture
 
 ### System Overview
 
@@ -103,7 +103,7 @@ Webhook (POST) → Code (Rate Limit + Parse) → AI Agent → Respond to Webhook
 | **Simple Memory** | Session-based conversation memory using client sessionId |
 | **Respond to Webhook** | Returns JSON with AI message and follow-up suggestions |
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Category | Technologies |
 |----------|-------------|
@@ -114,7 +114,7 @@ Webhook (POST) → Code (Rate Limit + Parse) → AI Agent → Respond to Webhook
 | **Validation** | Zod |
 | **AI Backend** | n8n, Google Gemini 2.0 Flash |
 
-## 📡 Data Sources
+##  Data Sources
 
 | Data | Source | Cost |
 |------|--------|------|
@@ -124,7 +124,7 @@ Webhook (POST) → Code (Rate Limit + Parse) → AI Agent → Respond to Webhook
 | Radar tiles | [RainViewer](https://www.rainviewer.com/api.html) | Free |
 | AQI (US) | [AirNow](https://www.airnow.gov/) | Free |
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18+ (recommended: 20 LTS)
@@ -153,7 +153,7 @@ npm run build
 npm run preview
 ```
 
-## 🤖 AI Assistant Setup (n8n)
+##  AI Assistant Setup (n8n)
 
 ### Quick Import
 
@@ -238,7 +238,7 @@ RULES:
 - Only answer weather, clothing, outdoor activity questions
 - For other topics, politely decline
 - Use the weather data provided
-- Be friendly, use emojis 🌡️ ☀️ 🌧️ 💨 👕
+- Be friendly, use emojis 
 
 WEATHER DATA:
 {{ $json.weatherData }}
@@ -262,7 +262,7 @@ WEATHER DATA:
 
 </details>
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 src/
@@ -288,7 +288,7 @@ src/
 └── App.tsx                 # Main app component
 ```
 
-## 🌐 Deployment
+##  Deployment
 
 ### GitHub Pages (Recommended)
 
@@ -309,18 +309,18 @@ Build and deploy the `dist/` folder:
 | Netlify | Drag & drop `dist/` |
 | Cloudflare Pages | Connect repo |
 
-## 🔒 Security
+##  Security
 
 - **Rate Limiting** — 30 requests per IP per hour (configurable in n8n)
 - **Input Validation** — All requests validated before processing
 - **No API Keys Exposed** — Weather APIs are free/public, n8n handles LLM credentials
 - **Session Isolation** — Each user gets isolated conversation memory
 
-## 📜 License
+##  License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - [Open-Meteo](https://open-meteo.com/) — Free weather API
 - [RainViewer](https://www.rainviewer.com/) — Radar data
