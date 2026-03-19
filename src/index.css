@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+	--bg: #0b0f1a;
+}
+
+html, body, #root {
+	height: 100%;
+}
+
+body {
+	background: var(--bg);
+}
+
+/* Layout polish */
+.card-grid > * { min-width: 0; }
+
+/* Tighten default line-heights slightly for tiles */
+.tile-heading { line-height: 1.1; }

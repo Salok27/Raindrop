@@ -1,0 +1,104 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "weather-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [288, 512],
+      "id": "95895780-76cc-4e80-bb4e-9df15b85c082",
+      "name": "Webhook1",
+      "webhookId": "1e1c6ccc-0304-4b6b-bb3e-b304ce9b4c34"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are a helpful Weather Assistant for {{ $json.location }}. Your job is to help users with weather-related questions ONLY.\n\nIMPORTANT RULES:\n1. ONLY answer questions about weather, clothing recommendations, outdoor activities\n2. If asked about anything NOT related to weather, politely say: \"I can only help with weather questions! Ask me about the weather in {{ $json.location }}, what to wear, or outdoor activities! ☀️\"\n3. Base ALL answers on the weather data below\n4. Be concise and friendly, use emojis 🌡️ ☀️ 🌧️ 💨 👕\n\nCURRENT WEATHER DATA:\n{{ $json.weatherData }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [656, 512],
+      "id": "ddfd71f9-5ce1-44e8-a055-5f6be5242d00",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [560, 752],
+      "id": "1513e91d-1d8a-4a84-a47b-6f6ac3c7b933",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook1').item.json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [784, 768],
+      "id": "3596ee76-09d3-4e50-b610-4be3d4e2cca8",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ message: $json.output, suggestions: ['What should I wear?', 'Good for outdoor activities?', 'Will it rain?'] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [992, 512],
+      "id": "fd7b8ded-49c9-4830-b7ad-0778e4ee44d9",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get static data for rate limiting\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.requests) {\n  staticData.requests = {};\n}\n\nconst body = $input.first().json.body;\n\n// Get IP address from request headers\nconst ip = $('Webhook1').item.json.headers['x-forwarded-for'] \n  || $('Webhook1').item.json.headers['x-real-ip']\n  || 'unknown';\n\nconst now = Date.now();\nconst ONE_HOUR = 60 * 60 * 1000;\nconst MAX_REQUESTS = 30; // 30 requests per IP per hour\n\n// Clean old entries\nfor (const key in staticData.requests) {\n  if (now - staticData.requests[key].timestamp > ONE_HOUR) {\n    delete staticData.requests[key];\n  }\n}\n\n// Check rate limit for this IP\nif (!staticData.requests[ip]) {\n  staticData.requests[ip] = { count: 0, timestamp: now };\n}\n\nconst ipData = staticData.requests[ip];\n\nif (now - ipData.timestamp > ONE_HOUR) {\n  ipData.count = 0;\n  ipData.timestamp = now;\n}\n\nif (ipData.count >= MAX_REQUESTS) {\n  return [{\n    json: {\n      rateLimited: true,\n      message: 'Rate limit exceeded. Try again later.'\n    }\n  }];\n}\n\nipData.count++;\n\n// Validate request\nif (!body.message || !body.weather?.location) {\n  throw new Error('Invalid request');\n}\n\n// Format weather data for AI\nconst weather = body.weather;\nconst weatherData = `\nCurrent Weather for ${weather.location}:\n- Temperature: ${weather.temperature || 0}°C (feels like ${weather.feelsLike || 0}°C)\n- Condition: ${weather.condition || 'Unknown'}\n- Humidity: ${weather.humidity || 0}%\n- Wind: ${weather.windSpeed || 0} km/h\n- Rain Chance: ${weather.precipitationChance || 0}%\n- UV Index: ${weather.uvIndex || 0}\n\nToday: ${weather.todayLow || 0}°C - ${weather.todayHigh || 0}°C\n`.trim();\n\nreturn [{\n  json: {\n    rateLimited: false,\n    sessionId: body.sessionId,\n    chatInput: body.message,\n    location: weather.location,\n    weatherData: weatherData\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 512],
+      "id": "a350ba1c-a214-4c63-9ef5-bf3b256a4c9f",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "Webhook1": {
+      "main": [[{"node": "Code in JavaScript", "type": "main", "index": 0}]]
+    },
+    "AI Agent1": {
+      "main": [[{"node": "Respond to Webhook1", "type": "main", "index": 0}]]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [[{"node": "AI Agent1", "type": "ai_languageModel", "index": 0}]]
+    },
+    "Simple Memory1": {
+      "ai_memory": [[{"node": "AI Agent1", "type": "ai_memory", "index": 0}]]
+    },
+    "Code in JavaScript": {
+      "main": [[{"node": "AI Agent1", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
+
